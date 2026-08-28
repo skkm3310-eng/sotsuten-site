@@ -1,0 +1,42 @@
+---
+import Base from "../../layouts/Base.astro";
+import ArtistRow from "../../components/ArtistRow.astro";
+import Reveal from "../../components/Reveal.astro";
+import { getCollection } from "astro:content";
+
+const artists = (await getCollection("artists")).sort((a, b) => a.data.order - b.data.order);
+const count = String(artists.length).padStart(2, "0");
+---
+
+<Base title="Artists" description="出展者一覧">
+  <section class="section head">
+    <div class="container">
+      <p class="eyebrow">_Artists</p>
+      <h1>{count} Participating<br />Artists</h1>
+      <p class="lead">今回の出展作品と過去のポートフォリオを掲載。</p>
+    </div>
+  </section>
+
+  <section class="list">
+    <div class="container">
+      {artists.map((artist, i) => <Reveal><ArtistRow artist={artist} index={i + 1} /></Reveal>)}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .container { max-width: 1180px; }
+  .head { border-bottom: 1px solid var(--color-line); padding-block: var(--space-5) var(--space-4); }
+  .eyebrow {
+    font-size: var(--text-xs); letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--color-ink-weak);
+  }
+  h1 {
+    font-family: var(--font-display); font-weight: 300;
+    font-size: clamp(2.5rem, 5vw, 3.5rem); line-height: 1.05;
+    letter-spacing: -0.01em; color: #0d0d0d; margin-top: var(--space-3);
+  }
+  .lead { font-weight: 300; font-size: 1.25rem; color: #0d0d0d; margin-top: var(--space-4); }
+  .list { padding-block: 0; }
+  .list .container > :global(.row:last-child) { border-bottom: 0; }
+</style>

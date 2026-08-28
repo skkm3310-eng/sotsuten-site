@@ -1,0 +1,125 @@
+---
+/**
+ * オープニング(カメレオンの目)
+ * - 初回訪問時だけ、画面全体を覆うオーバーレイに「目」を表示
+ * - 目のアニメが終わったらオーバーレイをフェードで外し、HOMEを見せる
+ * - 目のRive自体は同じ位置に残る想定なので、オープニング→HOMEで目が連続する
+ * - 2回目以降(localStorageに記録あり)は最初からオーバーレイを出さない
+ *
+ * ▼Riveの.rivへの差し替え方
+ *   1) public/rive/ に chameleon-eye.riv を置く
+ *   2) 下の <div class="eye-stage"> の中の仮SVG(#tmp-eye)を Riveのcanvasに置き換え
+ *   3) <script> の TODO 部分に、Riveの読み込みと
+ *      「オープニング用ステート → カーソル追従ステート」の切り替えを実装
+ *   （Riveランタイムは npm i @rive-app/canvas か CDN で読み込み）
+ *
+ *   ※このプレビュー環境ではlocalStorageが使えないため「毎回再生」になります。
+ *     本番(Cloudflare Pages)では初回だけ再生されます。
+ */
+---
+
+<div id="opening" class="opening" aria-hidden="true">
+  <div class="eye-stage" id="eye-stage">
+    {/* 仮の目(SVG)。本番はここをRiveのcanvasに差し替え */}
+    <svg id="tmp-eye" viewBox="0 0 200 200" width="180" height="180" role="img" aria-label="">
+      <!-- まぶた/眼球/瞳を別レイヤーで(Riveでも同様に分ける想定) -->
+      <ellipse class="eyeball" cx="100" cy="100" rx="80" ry="80" fill="#f4f3ef" stroke="#111" stroke-width="3"/>
+      <circle class="iris" cx="100" cy="100" r="34" fill="#111"/>
+      <circle class="pupil" cx="100" cy="100" r="14" fill="#000"/>
+      <circle class="glint" cx="112" cy="88" r="6" fill="#fff"/>
+    </svg>
+  </div>
+</div>
+
+<script>
+  const KEY = "henka_opening_seen_v1";
+  const opening = document.getElementById("opening");
+  const eyeStage = document.getElementById("eye-stage");
+  if (opening && eyeStage) {
+    let seen = false;
+    try { seen = localStorage.getItem(KEY) === "1"; } catch (e) { /* プレビュー等では毎回再生 */ }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (seen || reduce) {
+      // 2回目以降 or 動きを減らす設定 → オープニングを出さずHOME表示
+      opening.remove();
+      document.documentElement.classList.remove("is-opening");
+    } else {
+      // 初回 → オープニング再生
+      document.documentElement.classList.add("is-opening");
+
+      // TODO(Rive): ここで chameleon-eye.riv を読み込み、
+      //   オープニング用ステートを再生。完了イベントで finishOpening() を呼ぶ。
+      //   目のcanvasはHOMEのヒーロー内の目と同じ画面座標に置くと連続して見える。
+
+      const finishOpening = () => {
+        // オーバーレイをフェードアウト → HOME本体を表示
+        opening.classList.add("done");
+        document.documentElement.classList.remove("is-opening");
+        // TODO(Rive): ここでRiveを「カーソル追従」ステートへ切り替え、
+        //   目のcanvasをオーバーレイからHOMEのヒーロー内へ受け渡す(位置は保ったまま)
+        try { localStorage.setItem(KEY, "1"); } catch (e) {}
+        // トランジション後に要素を除去
+        setTimeout(() => opening.remove(), 900);
+      };
+
+      // 仮の演出: 目がふっと浮かび上がって、少し「見回して」から完了
+      // (本番はRiveのアニメ完了イベントに置き換え)
+      eyeStage.classList.add("play");
+      const pupil = eyeStage.querySelector(".pupil");
+      const iris = eyeStage.querySelector(".iris");
+      const glint = eyeStage.querySelector(".glint");
+      let t = 0;
+      const look = [[0,0],[10,-6],[-8,6],[6,8],[0,0]];
+      const step = () => {
+        if (t >= look.length) { finishOpening(); return; }
+        const [dx, dy] = look[t];
+        if (pupil) { pupil.setAttribute("cx", String(100+dx)); pupil.setAttribute("cy", String(100+dy)); }
+        if (iris)  { iris.setAttribute("cx", String(100+dx*0.6)); iris.setAttribute("cy", String(100+dy*0.6)); }
+        if (glint) { glint.setAttribute("cx", String(112+dx*0.5)); glint.setAttribute("cy", String(88+dy*0.5)); }
+        t++;
+        setTimeout(step, 520);
+      };
+      // 浮かび上がり後に見回し開始
+      setTimeout(step, 900);
+    }
+  }
+</script>
+
+<style>
+  .opening {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    background: var(--color-panel, #f4f3ef);
+    transition: opacity 0.8s ease;
+  }
+  .opening.done { opacity: 0; pointer-events: none; }
+
+  .eye-stage {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  .eye-stage.play {
+    animation: eyeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  #tmp-eye .pupil, #tmp-eye .iris, #tmp-eye .glint {
+    transition: cx 0.42s ease, cy 0.42s ease;
+  }
+
+  @keyframes eyeIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* オープニング中はHOMEのスクロールを止める(ちらつき防止) */
+  :global(html.is-opening),
+  :global(html.is-opening body) {
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .opening { display: none; }
+  }
+</style>

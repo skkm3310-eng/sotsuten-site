@@ -1,0 +1,27 @@
+---
+import Base from "../../layouts/Base.astro";
+import BlogCard from "../../components/BlogCard.astro";
+import { getBlogList } from "../../lib/microcms";
+
+const posts = await getBlogList();
+---
+
+<Base title="Blog" description="制作の記録">
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Blog</h2>
+      {posts.length === 0 && <p>記事はまだありません。</p>}
+      <div class="grid">
+        {posts.map((item) => <BlogCard item={item} />)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-4) var(--space-3);
+  }
+</style>

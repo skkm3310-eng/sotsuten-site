@@ -1,0 +1,32 @@
+---
+import { formatDate, type News } from "../lib/microcms";
+
+interface Props {
+  item: News;
+}
+const { item } = Astro.props;
+---
+
+<a href={`/news/${item.id}/`} class="row">
+  <time datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+  <span class="tag">{item.category[0]}</span>
+  <p>{item.title}</p>
+</a>
+
+<style>
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+    border-bottom: 1px solid var(--color-line);
+    text-decoration: none;
+  }
+  .row:hover p { color: var(--color-accent); }
+  time { font-size: var(--text-sm); color: var(--color-ink-weak); flex-shrink: 0; }
+  .tag { flex-shrink: 0; }
+  @media (max-width: 600px) {
+    .row { flex-wrap: wrap; gap: var(--space-1) var(--space-2); }
+    .row p { width: 100%; }
+  }
+</style>

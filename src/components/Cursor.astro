@@ -1,0 +1,69 @@
+---
+// カーソル追従の丸(中が透明・輪郭だけ)
+// ・マウスに少し遅れてついてくる
+// ・リンク/ボタン/作品カードに重なると大きくなる
+// ・タッチ端末(スマホ・タブレット)では表示しない
+---
+
+<div class="cursor" aria-hidden="true"></div>
+
+<script>
+  const dot = document.querySelector<HTMLElement>(".cursor");
+  // マウスが使えない端末では何もしない(スマホ等)
+  const hasMouse = window.matchMedia("(pointer: fine)").matches;
+  if (dot && hasMouse) {
+    dot.style.display = "block";
+
+    // 目標位置(マウスの現在地)と、実際の丸の位置を分けて持つ。
+    // 丸を目標へ少しずつ近づけることで「遅れてついてくる」動きになる。
+    let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+    let x = mouseX, y = mouseY;
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function loop() {
+      x += (mouseX - x) * 0.18; // 0に近いほどゆっくり追従
+      y += (mouseY - y) * 0.18;
+      dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    // リンク・ボタン・作品カードに重なったら大きくする
+    const targets = "a, button, .card, summary";
+    document.addEventListener("mouseover", (e) => {
+      if ((e.target as HTMLElement).closest(targets)) dot.classList.add("is-hover");
+    });
+    document.addEventListener("mouseout", (e) => {
+      if ((e.target as HTMLElement).closest(targets)) dot.classList.remove("is-hover");
+    });
+  }
+</script>
+
+<style>
+  .cursor {
+    display: none; /* JSがマウス端末と判断したときだけ表示 */
+    position: fixed;
+    top: 0; left: 0;
+    width: 34px;
+    height: 34px;
+    border: 1.5px solid var(--color-accent);
+    border-radius: 50%;
+    pointer-events: none; /* 丸がクリックの邪魔をしないように */
+    z-index: 1000;
+    transition: width 0.25s ease, height 0.25s ease, background-color 0.25s ease;
+    will-change: transform;
+  }
+  .cursor.is-hover {
+    width: 60px;
+    height: 60px;
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  }
+  /* 念のため: 動きを減らす設定の人には追従を出さない */
+  @media (prefers-reduced-motion: reduce) {
+    .cursor { display: none !important; }
+  }
+</style>

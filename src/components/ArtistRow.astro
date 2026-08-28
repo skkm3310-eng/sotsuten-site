@@ -1,0 +1,130 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  artist: CollectionEntry<"artists">;
+  index: number; // 通し番号(01, 02...)
+}
+const { artist, index } = Astro.props;
+const { name, nameEn, category, exhibition, portfolio, exhibitionTitle, profile } = artist.data;
+const num = String(index).padStart(2, "0");
+const ready = exhibition.length > 0;
+---
+
+<article class="row">
+  <div class="num">{num}</div>
+
+  <div class="body">
+    <!-- 左: プロフィール -->
+    <div class="who">
+      <div class="avatar" aria-hidden="true"></div>
+      <div class="meta">
+        <p class="name-en">{nameEn ?? name}</p>
+        <p class="name-jp">
+          <span>{name}</span>
+          {category[0] && <span class="cat">{category[0]}_</span>}
+        </p>
+        <dl class="profile">
+          {profile.origin && (<><dt>出身</dt><dd>{profile.origin}</dd></>)}
+          {profile.hobby && (<><dt>趣味</dt><dd>{profile.hobby}</dd></>)}
+          {profile.note && (<><dt>ひとこと</dt><dd>{profile.note}</dd></>)}
+        </dl>
+      </div>
+    </div>
+
+    <!-- 右: 展示作品 + 過去作 -->
+    <div class="works">
+      <div class="block exhibition">
+        <div class="block-head">
+          <div>
+            <p class="eyebrow">グループ展　展示作品</p>
+            <p class="title">{ready ? exhibitionTitle : "準備中"}</p>
+          </div>
+          <span class="plus" aria-hidden="true">+</span>
+        </div>
+        {ready && (
+          <div class="ex-images">
+            {exhibition.map((w) => <img src={w.image} alt={w.title} loading="lazy" />)}
+          </div>
+        )}
+      </div>
+
+      <div class="block past">
+        <div class="block-head">
+          <p class="title">過去の作品</p>
+          <span class="arrows" aria-hidden="true">&lt; &gt;</span>
+        </div>
+        <div class="gallery">
+          {portfolio.map((w) => <img src={w.image} alt={w.title} loading="lazy" />)}
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-5);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 3.5rem;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    color: #0d0d0d;
+  }
+  .body { display: grid; grid-template-columns: 220px 1fr; gap: var(--space-5); }
+
+  /* プロフィール */
+  .who { display: flex; gap: var(--space-3); }
+  .avatar {
+    width: 72px; height: 84px; flex-shrink: 0;
+    background: #d9d9d9;
+  }
+  .name-en { font-size: 1.4rem; letter-spacing: -0.01em; color: #0d0d0d; }
+  .name-jp { display: flex; align-items: baseline; gap: var(--space-1); margin-top: 0.2em; }
+  .name-jp > span:first-child { font-size: var(--text-sm); color: var(--color-ink-weak); }
+  .cat { font-size: var(--text-xs); letter-spacing: 0.18em; text-transform: uppercase; color: #b07a52; }
+  .profile {
+    display: grid; grid-template-columns: auto 1fr; gap: 0.1em var(--space-2);
+    margin-top: var(--space-2); font-weight: 300; font-size: var(--text-sm);
+  }
+  .profile dt { color: var(--color-ink-weak); }
+  .profile dd { color: #0d0d0d; }
+
+  /* 作品側 */
+  .works { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+  .block-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-line);
+  }
+  .eyebrow { font-size: var(--text-xs); color: var(--color-ink-weak); margin-bottom: 0.3em; }
+  .block-head .title { font-size: 1.4rem; color: #0d0d0d; }
+  .plus { font-size: 2rem; font-weight: 200; color: var(--color-ink-weak); line-height: 1; }
+  .arrows { font-size: 1.3rem; font-weight: 200; letter-spacing: 0.3em; color: var(--color-ink-weak); }
+
+  .ex-images { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+  .ex-images img { width: 40%; border-radius: var(--radius-sm); background: #d9d9d9; }
+
+  /* 過去作: 横スクロールギャラリー */
+  .gallery {
+    display: flex; gap: var(--space-2); margin-top: var(--space-3);
+    overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--space-1);
+  }
+  .gallery img {
+    height: 320px; width: auto; flex-shrink: 0;
+    background: #d9d9d9; border-radius: var(--radius-sm); scroll-snap-align: start;
+  }
+
+  @media (max-width: 900px) {
+    .row { grid-template-columns: 40px 1fr; gap: var(--space-2); padding-block: var(--space-4); }
+    .num { font-size: 2rem; }
+    .body { grid-template-columns: 1fr; gap: var(--space-3); }
+    .gallery img { height: 220px; }
+  }
+</style>

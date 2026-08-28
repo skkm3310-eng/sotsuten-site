@@ -1,0 +1,50 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  artist: CollectionEntry<"artists">;
+}
+const { artist } = Astro.props;
+const { name, category, exhibition, portfolio, thumbnail } = artist.data;
+// 代表サムネイル: 指定 → 出展作品の先頭 → ポートフォリオの先頭 の順で採用
+const cover = thumbnail ?? exhibition[0]?.image ?? portfolio[0]?.image;
+const ready = exhibition.length > 0; // 出展作品が入っているか
+const cats = category.map((c) => c.toLowerCase()).join(" ");
+---
+
+<a href={`/artists/${artist.id}/`} class="card" data-categories={cats}>
+  <figure>
+    {cover ? <img src={cover} alt={`${name}の作品`} loading="lazy" /> : <div class="ph" aria-hidden="true">No Image</div>}
+    {!ready && <span class="badge">出展作品 準備中</span>}
+  </figure>
+  <div class="meta">
+    <p class="name">{name}</p>
+    <p class="tags">{category.map((c) => <span class="tag">{c}</span>)}</p>
+  </div>
+</a>
+
+<style>
+  .card { display: block; text-decoration: none; break-inside: avoid; margin-bottom: var(--space-4); }
+  figure {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-surface);
+    margin-bottom: var(--space-2);
+  }
+  figure img { width: 100%; transition: transform 0.4s ease; }
+  .card:hover img { transform: scale(1.03); }
+  .ph { aspect-ratio: 4 / 3; display: grid; place-items: center; color: var(--color-ink-weak); }
+  .badge {
+    position: absolute;
+    left: var(--space-1);
+    top: var(--space-1);
+    background: color-mix(in srgb, var(--color-ink) 78%, transparent);
+    color: #fff;
+    font-size: var(--text-xs);
+    padding: 0.3em 0.7em;
+    border-radius: 999px;
+  }
+  .name { font-weight: 700; }
+  .tags { display: flex; gap: var(--space-1); margin-top: var(--space-1); flex-wrap: wrap; }
+</style>

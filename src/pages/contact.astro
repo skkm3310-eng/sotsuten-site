@@ -1,0 +1,23 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Contact" description="お問い合わせ">
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Contact</h2>
+      <div class="prose">
+        <p>展示や取材に関するお問い合わせは、以下のフォームからお送りください。</p>
+        <!--
+          TODO: フォームサービスと接続する。
+          静的サイトなので、SSGForm(https://ssgform.com/)やFormspreeの
+          無料枠を使うと、自作のフォームHTMLをそのまま使えます。
+          form の action にサービスが発行するURLを入れるだけです。
+          例:
+          <form action="https://ssgform.com/s/xxxxxxxx" method="post"> ... </form>
+        -->
+        <p><a href="mailto:example@example.com">example@example.com</a></p>
+      </div>
+    </div>
+  </section>
+</Base>

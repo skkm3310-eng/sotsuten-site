@@ -1,0 +1,52 @@
+---
+/**
+ * セクション見出し(andmade風の型)
+ * - 左に等幅の小ラベル (Vision) のような英字ラベル
+ * - 右端に連番 01
+ * - 下に日本語の見出し(セリフ体は既存のまま)
+ * 使い方: <SectionHead label="Vision" num="01" title="展示について" />
+ */
+interface Props {
+  label: string;   // 例: Vision (括弧は自動で付く)
+  num?: string;    // 例: "01"
+  title?: string;  // 日本語見出し(任意)
+}
+const { label, num, title } = Astro.props;
+---
+
+<header class="sec-head">
+  <div class="line">
+    <span class="label">({label})</span>
+    {num && <span class="num">{num}</span>}
+  </div>
+  {title && <h2 class="title">{title}</h2>}
+</header>
+
+<style>
+  .sec-head { margin-bottom: var(--space-4); }
+  .line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    color: var(--color-ink-weak);
+  }
+  .num {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-ink-weak);
+  }
+  .title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-xl);
+    line-height: 1.3;
+    margin-top: var(--space-3);
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+import { formatDate, type News } from "../lib/microcms";
+
+interface Props {
+  items: News[];
+}
+const { items } = Astro.props;
+---
+
+<div class="accordion">
+  {items.map((item) => (
+    <details>
+      <summary>
+        <time datetime={item.publishedAt}>{formatDate(item.publishedAt)}</time>
+        <span class="tag">{item.category[0]}</span>
+        <span class="title">{item.title}</span>
+        <span class="chev" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="body prose" set:html={item.body} />
+    </details>
+  ))}
+</div>
+
+<style>
+  details { border-bottom: 1px solid var(--color-line); }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+  summary::-webkit-details-marker { display: none; }
+  time { font-size: var(--text-sm); color: var(--color-ink-weak); flex-shrink: 0; }
+  .tag { flex-shrink: 0; }
+  summary .title { font-weight: 500; }
+  .chev { margin-left: auto; transition: transform 0.2s ease; }
+  details[open] .chev { transform: rotate(180deg); }
+  .body { padding: 0 0 var(--space-3); }
+  @media (max-width: 600px) {
+    summary { flex-wrap: wrap; }
+    summary .title { width: 100%; }
+    .chev { position: absolute; right: 0; }
+    details { position: relative; }
+  }
+</style>

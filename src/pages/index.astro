@@ -1,0 +1,74 @@
+---
+import Base from "../layouts/Base.astro";
+import ArtistCard from "../components/ArtistCard.astro";
+import NewsAccordion from "../components/NewsAccordion.astro";
+import Hero from "../components/Hero.astro";
+import Opening from "../components/Opening.astro";
+import Reveal from "../components/Reveal.astro";
+import { getCollection } from "astro:content";
+import { getNewsList } from "../lib/microcms";
+
+const artists = (await getCollection("artists")).sort((a, b) => a.data.order - b.data.order);
+const news = await getNewsList({ limit: 5 });
+const filters = ["All", "Graphic", "Web", "Illustration"];
+---
+
+<Base>
+  <Opening />
+  <Hero />
+
+  <Reveal as="section" class="section" id="works">
+    <div class="container">
+      <div class="head">
+        <h2 class="section-title">Works</h2>
+        <div class="filters">
+          {filters.map((f, i) => (
+            <button class="filter" data-filter={f.toLowerCase()} aria-pressed={i === 0 ? "true" : "false"}>{f}</button>
+          ))}
+        </div>
+      </div>
+      <p class="notice">※ 出展作品は現在準備中です。各メンバーのこれまでの作品を掲載しています。</p>
+      <div class="masonry" id="work-grid">
+        {artists.map((artist) => <ArtistCard artist={artist} />)}
+      </div>
+      <p class="more"><a href="/works/">See All →</a></p>
+    </div>
+  </Reveal>
+
+  <Reveal as="section" class="section" id="news">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom: var(--space-3)">News</h2>
+      {news.length === 0 && <p>お知らせはまだありません。</p>}
+      <NewsAccordion items={news} />
+      <p class="more"><a href="/news/">More →</a></p>
+    </div>
+  </Reveal>
+</Base>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".filter");
+  const cards = document.querySelectorAll<HTMLElement>("#work-grid .card");
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filter = btn.dataset.filter ?? "all";
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      cards.forEach((card) => {
+        const cats = card.dataset.categories ?? "";
+        card.style.display = filter === "all" || cats.split(" ").includes(filter) ? "" : "none";
+      });
+    });
+  });
+</script>
+
+<style>
+  .notice { font-size: var(--text-sm); color: var(--color-ink-weak); margin-bottom: var(--space-3); }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap; }
+  .filters { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+  .filter { border: 0; background: transparent; border-radius: 999px; padding: 0.4em 1em; font-size: var(--text-sm); color: var(--color-ink-weak); }
+  .filter[aria-pressed="true"] { background: var(--color-accent); color: #fff; }
+  .masonry { column-count: 2; column-gap: var(--space-3); }
+  @media (max-width: 600px) { .masonry { column-count: 1; } }
+  .more { margin-top: var(--space-3); }
+  .more a { text-decoration: none; font-weight: 500; }
+  .more a:hover { color: var(--color-accent); }
+</style>

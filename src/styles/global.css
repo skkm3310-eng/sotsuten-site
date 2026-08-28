@@ -1,0 +1,64 @@
+@import "./tokens.css";
+
+/* --- リセット --- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+button { font: inherit; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* --- レイアウトの土台(全面フラット版) --- */
+.layout { min-height: 100vh; display: flex; flex-direction: column; }
+.panel {
+  flex: 1 0 auto;         /* 本文がフッターを下へ押し出す */
+  background: var(--color-panel);
+}
+.container {
+  max-width: 1080px;
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+.section { padding-block: var(--space-5); }
+
+/* 英字のセクション見出し(Works / News) */
+.section-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: var(--text-xl);
+  letter-spacing: 0.01em;
+}
+
+/* カテゴリタグ */
+.tag {
+  display: inline-block;
+  font-size: var(--text-xs);
+  line-height: 1;
+  padding: 0.35em 0.8em;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  color: var(--color-ink-weak);
+}
+
+/* microCMSリッチエディタ本文 */
+.prose { max-width: 720px; }
+.prose > * + * { margin-top: var(--space-2); }
+.prose h2 { font-size: var(--text-lg); margin-top: var(--space-4); }
+.prose h3 { font-size: var(--text-md); margin-top: var(--space-3); }
+.prose img { border-radius: var(--radius-sm); }
+.prose a { color: var(--color-accent); }
+.prose ul, .prose ol { padding-left: 1.4em; }
+
+/* --- スマホ: サイドバーを上部バーに --- */

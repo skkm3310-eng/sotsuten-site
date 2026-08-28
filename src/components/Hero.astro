@@ -1,0 +1,159 @@
+---
+/**
+ * HERO キービジュアル(アメーバの花)
+ * - 大小のメリハリをつけて花を配置(重ならないよう非対称に散らす)
+ * - 各花びらが1枚ずつ滑らかに拡大縮小(呼吸)
+ * - 花全体がゆっくり浮遊し、カーソルに合わせて奥行き(パララックス)が出る
+ * - スマホや「動きを減らす」設定では静止
+ *
+ * ▼本番の絵への差し替え方
+ *   花を1つずつ背景透過のPNG/WebPで書き出して public/hero/ に置き、
+ *   各パーツの <svg ...><use .../></svg> を
+ *   <img src="/hero/xxx.webp" alt="" /> に置き換えてください。
+ *   位置(x,y)・大きさ(w)・奥行き(depth)・浮遊の速さ(dur)は parts で調整できます。
+ *   本番画像に全部差し替えたら、末尾の <svg class="defs"> は丸ごと削除可。
+ */
+
+const parts = [
+  { shape: "GA",  x: "6%",  y: "46%", w: "46%",  depth: 0.05,  dur: "8.5s", delay: "0s",    bd: "0s" },
+  { shape: "GB",  x: "62%", y: "6%",  w: "24%",  depth: 0.035, dur: "9.5s", delay: "-4s",   bd: "-3s" },
+  { shape: "GC",  x: "30%", y: "30%", w: "13%",  depth: 0.09,  dur: "6.5s", delay: "-1.5s", bd: "-1.5s" },
+  { shape: "GBL", x: "20%", y: "20%", w: "6.5%", depth: 0.16,  dur: "5.5s", delay: "-2.5s", bd: "0s" },
+  { shape: "GC",  x: "72%", y: "62%", w: "8%",   depth: 0.13,  dur: "6s",   delay: "-3.5s", bd: "-2.8s" },
+  { shape: "GBL", x: "52%", y: "74%", w: "5%",   depth: 0.2,   dur: "5s",   delay: "-1s",   bd: "0s" },
+];
+---
+
+<section class="hero" aria-label="キービジュアル">
+  <div class="stage" id="hero-stage">
+    {parts.map((p) => (
+      <div
+        class="part"
+        data-depth={p.depth}
+        style={`left:${p.x}; top:${p.y}; width:${p.w}; --dur:${p.dur}; --delay:${p.delay}`}
+      >
+        <div class="float">
+          <svg viewBox="0 0 200 200" style={`--bd:${p.bd}`} role="img" aria-label=""><use href={`#${p.shape}`} /></svg>
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <svg class="defs" width="0" height="0" aria-hidden="true">
+    <defs>
+      <filter id="GCH" x="-30%" y="-30%" width="160%" height="160%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="warp" />
+        <feDisplacementMap in="SourceGraphic" in2="warp" scale="5" result="rough" />
+        <feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="2" seed="9" result="g" />
+        <feColorMatrix in="g" type="matrix" values="0 0 0 0 0.6  0 0 0 0 0.6  0 0 0 0 0.6  1 0 0 0 -0.62" result="spx" />
+        <feComposite in="spx" in2="rough" operator="in" result="sp" />
+        <feMerge><feMergeNode in="rough" /><feMergeNode in="sp" /></feMerge>
+      </filter>
+      <radialGradient id="GCTR" cx="45%" cy="43%" r="52%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.16" />
+        <stop offset="60%" stop-color="#ffffff" stop-opacity="0.03" />
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+      </radialGradient>
+
+      <g id="GA" filter="url(#GCH)">
+        <g fill="#111111">
+          <g transform="rotate(-8 100 100)"><ellipse class="petal" cx="100" cy="50" rx="33" ry="49" style="animation-delay:calc(var(--bd) + 0s)" /></g>
+          <g transform="rotate(64 100 100)"><ellipse class="petal" cx="100" cy="58" rx="24" ry="38" style="animation-delay:calc(var(--bd) + -0.9s)" /></g>
+          <g transform="rotate(140 100 100)"><ellipse class="petal" cx="100" cy="45" rx="36" ry="55" style="animation-delay:calc(var(--bd) + -1.8s)" /></g>
+          <g transform="rotate(208 100 100)"><ellipse class="petal" cx="100" cy="61" rx="22" ry="35" style="animation-delay:calc(var(--bd) + -2.7s)" /></g>
+          <g transform="rotate(292 100 100)"><ellipse class="petal" cx="100" cy="52" rx="30" ry="45" style="animation-delay:calc(var(--bd) + -3.6s)" /></g>
+          <circle cx="100" cy="100" r="25" />
+        </g>
+        <ellipse cx="96" cy="94" rx="40" ry="35" fill="url(#GCTR)" transform="rotate(-15 96 94)" />
+      </g>
+
+      <g id="GB" filter="url(#GCH)">
+        <g fill="#111111">
+          <g transform="rotate(6 100 100)"><ellipse class="petal" cx="100" cy="54" rx="27" ry="42" style="animation-delay:calc(var(--bd) + 0s)" /></g>
+          <g transform="rotate(64 100 100)"><ellipse class="petal" cx="100" cy="49" rx="32" ry="49" style="animation-delay:calc(var(--bd) + -0.8s)" /></g>
+          <g transform="rotate(122 100 100)"><ellipse class="petal" cx="100" cy="57" rx="25" ry="39" style="animation-delay:calc(var(--bd) + -1.6s)" /></g>
+          <g transform="rotate(180 100 100)"><ellipse class="petal" cx="100" cy="52" rx="30" ry="45" style="animation-delay:calc(var(--bd) + -2.4s)" /></g>
+          <g transform="rotate(240 100 100)"><ellipse class="petal" cx="100" cy="59" rx="23" ry="37" style="animation-delay:calc(var(--bd) + -3.2s)" /></g>
+          <g transform="rotate(302 100 100)"><ellipse class="petal" cx="100" cy="49" rx="33" ry="50" style="animation-delay:calc(var(--bd) + -4s)" /></g>
+          <circle cx="100" cy="100" r="26" />
+        </g>
+        <ellipse cx="98" cy="96" rx="42" ry="37" fill="url(#GCTR)" transform="rotate(-15 98 96)" />
+      </g>
+
+      <g id="GC" filter="url(#GCH)">
+        <g fill="#111111">
+          <g transform="rotate(20 100 100)"><ellipse class="petal" cx="100" cy="54" rx="30" ry="44" style="animation-delay:calc(var(--bd) + 0s)" /></g>
+          <g transform="rotate(108 100 100)"><ellipse class="petal" cx="100" cy="59" rx="25" ry="38" style="animation-delay:calc(var(--bd) + -1s)" /></g>
+          <g transform="rotate(198 100 100)"><ellipse class="petal" cx="100" cy="51" rx="33" ry="48" style="animation-delay:calc(var(--bd) + -2s)" /></g>
+          <g transform="rotate(286 100 100)"><ellipse class="petal" cx="100" cy="56" rx="26" ry="40" style="animation-delay:calc(var(--bd) + -3s)" /></g>
+          <circle cx="100" cy="100" r="24" />
+        </g>
+        <ellipse cx="96" cy="95" rx="38" ry="33" fill="url(#GCTR)" transform="rotate(-15 96 95)" />
+      </g>
+
+      <g id="GBL" filter="url(#GCH)">
+        <g fill="#111111">
+          <ellipse cx="92" cy="94" rx="15" ry="24" transform="rotate(-34 92 94)" />
+          <ellipse cx="112" cy="114" rx="12" ry="18" transform="rotate(22 112 114)" />
+        </g>
+      </g>
+    </defs>
+  </svg>
+</section>
+
+<script>
+  const stage = document.getElementById("hero-stage");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine = window.matchMedia("(pointer: fine)").matches;
+  if (stage && !reduce && fine) {
+    const parts = Array.from(stage.querySelectorAll<HTMLElement>(".part"));
+    stage.addEventListener("mousemove", (e) => {
+      const r = stage.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
+      const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+      parts.forEach((p) => {
+        const depth = parseFloat(p.dataset.depth || "0");
+        p.style.transform = `translate(${(dx * depth * 100).toFixed(1)}px, ${(dy * depth * 100).toFixed(1)}px)`;
+      });
+    });
+    stage.addEventListener("mouseleave", () => {
+      parts.forEach((p) => (p.style.transform = "translate(0,0)"));
+    });
+  }
+</script>
+
+<style>
+  .hero { padding: var(--space-3); }
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius-md);
+    background: #fff;
+    overflow: hidden;
+  }
+  .part {
+    position: absolute;
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .float { animation: floaty var(--dur, 8s) ease-in-out var(--delay, 0s) infinite alternate; }
+  .float svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .petal {
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    animation: petalPulse 4.8s ease-in-out infinite;
+  }
+
+  @keyframes floaty { from { translate: 0 -7px; } to { translate: 0 10px; } }
+  @keyframes petalPulse { 0%, 100% { transform: scale(0.86); } 50% { transform: scale(1.04); } }
+
+  .defs { position: absolute; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .float, .petal { animation: none; }
+  }
+  @media (max-width: 600px) {
+    .stage { aspect-ratio: 4 / 5; }
+  }
+</style>

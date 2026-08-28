@@ -1,0 +1,17 @@
+---
+import Base from "../../layouts/Base.astro";
+import NewsItem from "../../components/NewsItem.astro";
+import { getNewsList } from "../../lib/microcms";
+
+const news = await getNewsList();
+---
+
+<Base title="News" description="お知らせ一覧">
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">News</h2>
+      {news.length === 0 && <p>お知らせはまだありません。</p>}
+      {news.map((item) => <NewsItem item={item} />)}
+    </div>
+  </section>
+</Base>

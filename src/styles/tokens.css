@@ -1,0 +1,41 @@
+/* =========================================================
+   デザイントークン
+   色・フォント・余白はすべてここで管理。
+   Figmaの色が決まったら、まずこのファイルの値だけ書き換える。
+   ========================================================= */
+:root {
+  /* --- 色 --- */
+  --color-bg: #f4f3ef;        /* いちばん背面のグレー(パネルの外側) */
+  --color-panel: #f4f3ef;     /* 中央の白い角丸パネル */
+  --color-surface: #ffffff;   /* カード背景 */
+  --color-ink: #17171b;       /* 本文・見出し */
+  --color-ink-weak: #7a7871;  /* 補助テキスト */
+  --color-line: #e6e4de;      /* 罫線 */
+  --color-accent: #2f52ff;    /* メインの青(フッター・アクティブ状態) */
+  --color-accent-2: #ff5722;  /* サブアクセント */
+
+  /* --- タイポグラフィ --- */
+  --font-body: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+  --font-display: "Instrument Serif", serif; /* 英字セクション見出し(イタリック) */
+  --font-mono: "Space Mono", "SFMono-Regular", monospace; /* ラベル・番号用の等幅 */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.8rem, 4vw, 2.6rem);   /* セクション見出し Works/News */
+  --text-hero: clamp(3rem, 9vw, 6rem);     /* サイドバーの縦組みロゴ */
+
+  /* --- 余白スケール --- */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6rem;
+
+  /* --- レイアウト --- */
+  --sidebar-w: 240px;   /* 左サイドバーの幅 */
+  --radius-sm: 8px;
+  --radius-md: 18px;
+  --radius-lg: 32px;    /* パネル・フッターの大きな角丸 */
+}
