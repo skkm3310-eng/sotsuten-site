@@ -1,42 +1,143 @@
 ---
 import Base from "../../layouts/Base.astro";
-import ArtistRow from "../../components/ArtistRow.astro";
 import Reveal from "../../components/Reveal.astro";
-import { getCollection } from "astro:content";
+import { getWorksList } from "../../lib/microcms";
 
-const artists = (await getCollection("artists")).sort((a, b) => a.data.order - b.data.order);
-const count = String(artists.length).padStart(2, "0");
+const works = await getWorksList();
+const count = String(works.length).padStart(2, "0");
+
+const categoryColors: Record<string, string> = {
+  "グラフィック": "#b07a52",
+  "イラスト": "#6b82a8",
+  "立体": "#7d9b76",
+};
+const categoryLabels: Record<string, string> = {
+  "グラフィック": "Graphic",
+  "イラスト": "Illustration",
+  "立体": "Design",
+};
+
+const filters = ["All", ...Array.from(new Set(works.flatMap((w) => w.tags ?? [])))];
 ---
 
-<Base title="Artists" description="出展者一覧">
+<Base title="Works" description="今回の展示作品一覧">
   <section class="section head">
     <div class="container">
-      <p class="eyebrow">_Artists</p>
-      <h1>{count} Participating<br />Artists</h1>
-      <p class="lead">今回の出展作品と過去のポートフォリオを掲載。</p>
+      <p class="eyebrow">_Works</p>
+      <div class="head-row">
+        <h1>Exhibition<br />Works</h1>
+        <div class="filters">
+          {filters.map((f, i) => (
+            <button
+              class="filter"
+              data-filter={f === "All" ? "all" : f}
+              aria-pressed={i === 0 ? "true" : "false"}
+            >
+              {f === "All" ? "All" : (categoryLabels[f] ?? f)}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p class="count">{count} works_</p>
     </div>
   </section>
 
-  <section class="list">
+  <section class="grid-section">
     <div class="container">
-      {artists.map((artist, i) => <Reveal><ArtistRow artist={artist} index={i + 1} /></Reveal>)}
+      <div class="grid" id="work-grid">
+        {works.map((w, i) => {
+          const tag = w.tags?.[0];
+          const color = tag ? categoryColors[tag] ?? "#888" : "#888";
+          const label = tag ? categoryLabels[tag] ?? tag : "";
+          const num = String(i + 1).padStart(2, "0");
+          return (
+            <Reveal>
+              <div class="card" data-categories={(w.tags ?? []).join(" ")}>
+                <div class="thumb">
+                  {w.image && <img src={w.image.url} alt={w.title} loading="lazy" />}
+                  {label && <span class="badge" style={`background:${color}`}>{label}</span>}
+                </div>
+                <div class="meta">
+                  <div>
+                    <p class="wtitle">{w.title}</p>
+                    <p class="artist">{w.exhibitor?.nameEN ?? w.exhibitor?.name}</p>
+                  </div>
+                  <span class="idx">{num}_</span>
+                </div>
+              </div>
+            </Reveal>
+          );
+        })}
+      </div>
     </div>
   </section>
 </Base>
 
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".filter");
+  const cards = document.querySelectorAll<HTMLElement>("#work-grid .card");
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const filter = btn.dataset.filter ?? "all";
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      cards.forEach((card) => {
+        const cats = card.dataset.categories ?? "";
+        card.style.display = filter === "all" || cats.split(" ").includes(filter) ? "" : "none";
+      });
+    });
+  });
+</script>
+
 <style>
-  .container { max-width: 1180px; }
   .head { border-bottom: 1px solid var(--color-line); padding-block: var(--space-5) var(--space-4); }
   .eyebrow {
-    font-size: var(--text-xs); letter-spacing: 0.4em; text-transform: uppercase;
-    color: var(--color-ink-weak);
+    font-family: var(--font-body); font-size: 8.8px; letter-spacing: 3.96px;
+    text-transform: uppercase; color: var(--color-ink-weak);
+  }
+  .head-row {
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+    gap: var(--space-3); padding-block: 16px 32px;
   }
   h1 {
-    font-family: var(--font-display); font-weight: 300;
-    font-size: clamp(2.5rem, 5vw, 3.5rem); line-height: 1.05;
-    letter-spacing: -0.01em; color: #0d0d0d; margin-top: var(--space-3);
+    font-family: var(--font-body); font-weight: 300;
+    font-size: 56px; letter-spacing: -1.12px; line-height: 56px;
+    color: var(--color-ink); margin: 0;
   }
-  .lead { font-weight: 300; font-size: 1.25rem; color: #0d0d0d; margin-top: var(--space-4); }
-  .list { padding-block: 0; }
-  .list .container > :global(.row:last-child) { border-bottom: 0; }
+  .filters { display: flex; }
+  .filter {
+    border: 0; border-bottom: 1px solid transparent; background: transparent;
+    padding: 7px 20px 8.19px; font-family: var(--font-body); font-size: 8.8px;
+    letter-spacing: 2.64px; text-transform: uppercase; color: var(--color-ink-weak);
+  }
+  .filter[aria-pressed="true"] { border-bottom-color: var(--color-ink); color: var(--color-ink); }
+  .count {
+    font-family: var(--font-body); font-size: 8px; letter-spacing: 2.4px;
+    text-transform: uppercase; color: #ccc;
+  }
+
+  .grid-section { padding-block: var(--space-5); }
+  .grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .card { display: flex; flex-direction: column; }
+  .thumb { position: relative; aspect-ratio: 600 / 750; background: #f0ede9; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badge {
+    position: absolute; left: 14px; top: 20px;
+    padding: 3px 9.6px; font-family: var(--font-body); font-size: 7.2px;
+    letter-spacing: 2.16px; text-transform: uppercase; color: #fff;
+  }
+
+  .meta { display: flex; align-items: flex-start; justify-content: space-between; padding-top: 14px; gap: var(--space-2); }
+  .wtitle { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.12px; color: var(--color-ink); }
+  .artist { font-family: var(--font-body); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--color-ink-weak); margin-top: 3.19px; }
+  .idx { font-family: var(--font-body); font-size: 8px; letter-spacing: 2px; color: #ccc; }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+    h1 { font-size: 40px; line-height: 40px; }
+  }
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+  }
 </style>

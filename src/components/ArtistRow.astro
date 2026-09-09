@@ -3,12 +3,32 @@ import type { CollectionEntry } from "astro:content";
 
 interface Props {
   artist: CollectionEntry<"artists">;
-  index: number; // 通し番号(01, 02...)
+  index: number;
 }
 const { artist, index } = Astro.props;
-const { name, nameEn, category, exhibition, portfolio, exhibitionTitle, profile } = artist.data;
+const { name, nameEn, category, exhibition, portfolio, exhibitionTitle, profile, thumbnail, sns } = artist.data;
 const num = String(index).padStart(2, "0");
-const ready = exhibition.length > 0;
+
+const categoryColors: Record<string, string> = {
+  "グラフィック": "#b07a52",
+  "Graphic": "#b07a52",
+  "デザイン": "#7d9b76",
+  "Design": "#7d9b76",
+  "立体": "#7d9b76",
+  "イラスト": "#6b82a8",
+  "Illustration": "#6b82a8",
+};
+const categoryColor = categoryColors[category[0]] ?? "#888888";
+
+const snsList = [
+  { key: "x", url: sns?.x },
+  { key: "instagram", url: sns?.instagram },
+  { key: "facebook", url: sns?.facebook },
+  { key: "youtube", url: sns?.youtube },
+  { key: "tiktok", url: sns?.tiktok },
+  { key: "linkedin", url: sns?.linkedin },
+  { key: "threads", url: sns?.threads },
+].filter((s) => s.url);
 ---
 
 <article class="row">
@@ -17,19 +37,46 @@ const ready = exhibition.length > 0;
   <div class="body">
     <!-- 左: プロフィール -->
     <div class="who">
-      <div class="avatar" aria-hidden="true"></div>
-      <div class="meta">
-        <p class="name-en">{nameEn ?? name}</p>
-        <p class="name-jp">
-          <span>{name}</span>
-          {category[0] && <span class="cat">{category[0]}_</span>}
-        </p>
-        <dl class="profile">
-          {profile.origin && (<><dt>出身</dt><dd>{profile.origin}</dd></>)}
-          {profile.hobby && (<><dt>趣味</dt><dd>{profile.hobby}</dd></>)}
-          {profile.note && (<><dt>ひとこと</dt><dd>{profile.note}</dd></>)}
-        </dl>
+      <div class="who-top">
+        <div class="name-block">
+          <p class="name-en">{nameEn ?? name}</p>
+          <div class="name-meta">
+            <span class="name-jp">{name}</span>
+            {category.length > 0 && (
+              <span class="cat" style={`color:${categoryColor}`}>
+                {category.map((c) => `${c}_`).join("")}
+              </span>
+            )}
+          </div>
+        </div>
+        {thumbnail ? (
+          <img class="avatar" src={thumbnail} alt={`${name}のプロフィール写真`} loading="lazy" />
+        ) : (
+          <div class="avatar" aria-hidden="true"></div>
+        )}
       </div>
+
+      <dl class="profile">
+        {profile.origin && <p class="pline">出身：{profile.origin}</p>}
+        {profile.hobby && <p class="pline">趣味：{profile.hobby}</p>}
+        {profile.note && (
+          <div class="note">
+            <p class="note-label">ひとこと</p>
+            <p class="note-body">{profile.note}</p>
+          </div>
+        )}
+      </dl>
+
+      {snsList.length > 0 && (
+        <div class="sns">
+          {snsList.map((s) => (
+            <a class="sns-icon" href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.key}>
+              <img class="icon-default" src={`/icons/sns-${s.key}-default.svg`} alt="" />
+              <img class="icon-hover" src={`/icons/sns-${s.key}-hover.svg`} alt="" />
+            </a>
+          ))}
+        </div>
+      )}
     </div>
 
     <!-- 右: 展示作品 + 過去作 -->
@@ -37,94 +84,163 @@ const ready = exhibition.length > 0;
       <div class="block exhibition">
         <div class="block-head">
           <div>
+            <p class="title">{exhibitionTitle && exhibition.length > 0 ? exhibitionTitle : "準備中"}</p>
             <p class="eyebrow">グループ展　展示作品</p>
-            <p class="title">{ready ? exhibitionTitle : "準備中"}</p>
           </div>
-          <span class="plus" aria-hidden="true">+</span>
+          {exhibition.length > 3 && (
+            <div class="nav">
+              <button class="arrow prev" data-target={`ex-${artist.id}`} aria-label="前へ">&lt;</button>
+              <button class="arrow next" data-target={`ex-${artist.id}`} aria-label="次へ">&gt;</button>
+            </div>
+          )}
         </div>
-        {ready && (
-          <div class="ex-images">
-            {exhibition.map((w) => <img src={w.image} alt={w.title} loading="lazy" />)}
+        {exhibition.length > 0 && (
+          <div class="carousel" id={`ex-${artist.id}`}>
+            {exhibition.map((w) => (
+              <button
+                class="slide"
+                type="button"
+                data-lightbox-src={w.image}
+                data-lightbox-title={w.title}
+                data-lightbox-caption={w.caption ?? ""}
+              >
+                <img src={w.image} alt={w.title} loading="lazy" />
+              </button>
+            ))}
           </div>
         )}
       </div>
 
       <div class="block past">
         <div class="block-head">
-          <p class="title">過去の作品</p>
-          <span class="arrows" aria-hidden="true">&lt; &gt;</span>
+          <p class="title solo">過去の作品</p>
+          {portfolio.length > 3 && (
+            <div class="nav">
+              <button class="arrow prev" data-target={`pf-${artist.id}`} aria-label="前へ">&lt;</button>
+              <button class="arrow next" data-target={`pf-${artist.id}`} aria-label="次へ">&gt;</button>
+            </div>
+          )}
         </div>
-        <div class="gallery">
-          {portfolio.map((w) => <img src={w.image} alt={w.title} loading="lazy" />)}
+        <div class="carousel" id={`pf-${artist.id}`}>
+          {portfolio.map((w) => (
+            <button
+              class="slide"
+              type="button"
+              data-lightbox-src={w.image}
+              data-lightbox-title={w.title}
+              data-lightbox-caption={w.caption ?? ""}
+            >
+              <img src={w.image} alt={w.title} loading="lazy" />
+            </button>
+          ))}
         </div>
       </div>
     </div>
   </div>
 </article>
 
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".arrow").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.dataset.target;
+      const carousel = document.getElementById(targetId ?? "");
+      if (!carousel) return;
+      const slide = carousel.querySelector<HTMLElement>(".slide");
+      const step = slide ? slide.getBoundingClientRect().width + 24 : 300;
+      carousel.scrollBy({ left: btn.classList.contains("next") ? step : -step, behavior: "smooth" });
+    });
+  });
+</script>
+
 <style>
   .row {
     display: grid;
-    grid-template-columns: 64px 1fr;
-    gap: var(--space-4);
-    padding-block: var(--space-5);
+    grid-template-columns: 128px 1fr;
+    gap: 88px;
+    padding-block: 64px;
     border-bottom: 1px solid var(--color-line);
   }
   .num {
-    font-family: var(--font-display);
-    font-weight: 300;
-    font-size: 3.5rem;
-    letter-spacing: 0.1em;
+    font-family: var(--font-body);
+    font-weight: 200;
+    font-size: 64px;
+    letter-spacing: 8px;
     line-height: 1;
-    color: #0d0d0d;
+    text-align: right;
+    color: #000;
+    padding-top: 8px;
   }
-  .body { display: grid; grid-template-columns: 220px 1fr; gap: var(--space-5); }
+  .body { display: grid; grid-template-columns: 240px 1fr; gap: 88px; }
 
-  /* プロフィール */
-  .who { display: flex; gap: var(--space-3); }
+  /* --- プロフィール(左) --- */
+  .who { display: flex; flex-direction: column; gap: 32px; }
+  .who-top { display: flex; flex-direction: column; gap: 24px; }
+  .name-en { font-family: var(--font-body); font-size: 24px; line-height: 32px; color: var(--color-ink); }
+  .name-meta { display: flex; align-items: center; gap: 16px; padding-top: 4px; }
+  .name-jp { font-size: 12px; line-height: 18px; color: var(--color-ink-weak); }
+  .cat { font-size: 10px; letter-spacing: 2.16px; text-transform: uppercase; }
+
   .avatar {
-    width: 72px; height: 84px; flex-shrink: 0;
-    background: #d9d9d9;
+    width: 129px; height: 149px; flex-shrink: 0;
+    background: #d9d9d9; object-fit: cover;
   }
-  .name-en { font-size: 1.4rem; letter-spacing: -0.01em; color: #0d0d0d; }
-  .name-jp { display: flex; align-items: baseline; gap: var(--space-1); margin-top: 0.2em; }
-  .name-jp > span:first-child { font-size: var(--text-sm); color: var(--color-ink-weak); }
-  .cat { font-size: var(--text-xs); letter-spacing: 0.18em; text-transform: uppercase; color: #b07a52; }
-  .profile {
-    display: grid; grid-template-columns: auto 1fr; gap: 0.1em var(--space-2);
-    margin-top: var(--space-2); font-weight: 300; font-size: var(--text-sm);
-  }
-  .profile dt { color: var(--color-ink-weak); }
-  .profile dd { color: #0d0d0d; }
 
-  /* 作品側 */
-  .works { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
-  .block-head {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-line);
+  .profile { display: flex; flex-direction: column; gap: 8px; }
+  .pline {
+    font-family: var(--font-body); font-weight: 300; font-size: 16px;
+    line-height: 1.6; color: var(--color-ink);
   }
-  .eyebrow { font-size: var(--text-xs); color: var(--color-ink-weak); margin-bottom: 0.3em; }
-  .block-head .title { font-size: 1.4rem; color: #0d0d0d; }
-  .plus { font-size: 2rem; font-weight: 200; color: var(--color-ink-weak); line-height: 1; }
-  .arrows { font-size: 1.3rem; font-weight: 200; letter-spacing: 0.3em; color: var(--color-ink-weak); }
+  .note { display: flex; flex-direction: column; gap: 4px; }
+  .note-label { font-family: var(--font-body); font-weight: 300; font-size: 16px; line-height: 32px; color: var(--color-ink); }
+  .note-body { font-family: var(--font-body); font-weight: 300; font-size: 16px; line-height: 32px; color: var(--color-ink); text-align: justify; }
 
-  .ex-images { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
-  .ex-images img { width: 40%; border-radius: var(--radius-sm); background: #d9d9d9; }
+  .sns { display: flex; gap: 6px; padding-inline: 2px; }
+  .sns-icon { position: relative; width: 26.67px; height: 26.67px; display: block; }
+  .sns-icon img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .icon-hover { opacity: 0; transition: opacity 0.2s ease; }
+  .sns-icon:hover .icon-hover { opacity: 1; }
+  .sns-icon:hover .icon-default { opacity: 0; }
 
-  /* 過去作: 横スクロールギャラリー */
-  .gallery {
-    display: flex; gap: var(--space-2); margin-top: var(--space-3);
-    overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: var(--space-1);
+  /* --- 作品側(右) --- */
+  .works { display: flex; flex-direction: column; min-width: 0; }
+  .block { padding-bottom: 32px; display: flex; flex-direction: column; gap: 24px; }
+  .block-head { position: relative; display: flex; align-items: flex-start; justify-content: space-between; }
+  .title {
+    font-family: var(--font-body); font-size: 24px; line-height: 32px; color: var(--color-ink);
   }
-  .gallery img {
-    height: 320px; width: auto; flex-shrink: 0;
-    background: #d9d9d9; border-radius: var(--radius-sm); scroll-snap-align: start;
+  .title.solo { letter-spacing: -0.224px; }
+  .eyebrow { font-family: var(--font-body); font-size: 12px; line-height: 22px; letter-spacing: 0.12px; color: var(--color-ink-weak); }
+
+  .nav {
+    display: flex; align-items: center; gap: 24px;
+    position: absolute; right: 0; top: 0;
   }
+  .arrow {
+    border: 0; background: transparent; cursor: pointer;
+    font-family: var(--font-body); font-weight: 100; font-size: 40px;
+    letter-spacing: 8px; color: var(--color-ink-weak); line-height: 1;
+    padding: 0;
+  }
+  .arrow:hover { color: var(--color-ink); }
+
+  .carousel {
+    display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .carousel::-webkit-scrollbar { display: none; }
+  .slide {
+    border: 0; padding: 0; cursor: pointer; display: block;
+    flex: 0 0 calc((100% - 48px) / 3);
+    aspect-ratio: 4 / 3;
+    background: #d9d9d9; scroll-snap-align: start; overflow: hidden;
+  }
+  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   @media (max-width: 900px) {
     .row { grid-template-columns: 40px 1fr; gap: var(--space-2); padding-block: var(--space-4); }
-    .num { font-size: 2rem; }
+    .num { font-size: 2rem; letter-spacing: 2px; }
     .body { grid-template-columns: 1fr; gap: var(--space-3); }
-    .gallery img { height: 220px; }
+    .who-top { flex-direction: row-reverse; justify-content: space-between; }
+    .slide { flex-basis: calc((100% - 24px) / 2); height: 180px; }
   }
 </style>

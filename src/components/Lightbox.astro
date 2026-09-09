@@ -1,0 +1,105 @@
+---
+---
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lightbox-close" id="lightbox-close" aria-label="閉じる">×</button>
+  <div class="lightbox-inner">
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lightbox-caption">
+      <p class="lightbox-title" id="lightbox-title"></p>
+      <p class="lightbox-desc" id="lightbox-desc"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightbox-img") as HTMLImageElement;
+  const lightboxTitle = document.getElementById("lightbox-title");
+  const lightboxDesc = document.getElementById("lightbox-desc");
+  const closeBtn = document.getElementById("lightbox-close");
+
+  function openLightbox(src: string, title: string, desc: string) {
+    if (!lightbox || !lightboxImg) return;
+    lightboxImg.src = src;
+    lightboxImg.alt = title;
+    if (lightboxTitle) lightboxTitle.textContent = title;
+    if (lightboxDesc) lightboxDesc.textContent = desc;
+    lightbox.classList.add("open");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove("open");
+    lightbox.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  document.addEventListener("click", (e) => {
+    const target = (e.target as HTMLElement).closest<HTMLElement>("[data-lightbox-src]");
+    if (target) {
+      openLightbox(
+        target.dataset.lightboxSrc ?? "",
+        target.dataset.lightboxTitle ?? "",
+        target.dataset.lightboxCaption ?? ""
+      );
+    }
+  });
+
+  closeBtn?.addEventListener("click", closeLightbox);
+  lightbox?.addEventListener("click", (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLightbox();
+  });
+</script>
+
+<style>
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 13, 13, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 1000;
+  }
+  .lightbox.open { opacity: 1; pointer-events: auto; }
+
+  .lightbox-inner {
+    max-width: 1000px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .lightbox-inner img {
+    max-height: 75vh;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    margin-inline: auto;
+  }
+  .lightbox-caption { color: #fff; text-align: center; }
+  .lightbox-title { font-size: var(--text-md); font-weight: 500; }
+  .lightbox-desc { font-size: var(--text-sm); color: #ccc; margin-top: 0.3em; }
+
+  .lightbox-close {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+</style>

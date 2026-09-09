@@ -83,6 +83,37 @@ export async function getBlogList(queries?: MicroCMSQueries): Promise<Blog[]> {
   return res.contents;
 }
 
+export type Work = {
+  id: string;
+  title: string;
+  description?: string;
+  image?: { url: string; width: number; height: number };
+  tags?: string[];
+  type?: string[];
+  exhibitor?: { id: string; name: string; nameEN?: string };
+};
+
+const mockWorks: Work[] = [
+  {
+    id: "sample-work-1",
+    title: "Flux #1",
+    description: "",
+    image: { url: "https://placehold.co/600x750", width: 600, height: 750 },
+    tags: ["グラフィック"],
+    type: ["exhibition"],
+    exhibitor: { id: "sample", name: "田中 葵", nameEN: "Aoi Tanaka" },
+  },
+];
+
+export async function getWorksList(queries?: MicroCMSQueries): Promise<Work[]> {
+  if (!client) return mockWorks;
+  const res = await client.getList<Work>({
+    endpoint: "works",
+    queries: { limit: 100, filters: "type[contains]exhibition", ...queries },
+  });
+  return res.contents;
+}
+
 export function formatDate(iso: string): string {
   const d = new Date(iso);
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;

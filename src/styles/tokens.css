@@ -5,18 +5,18 @@
    ========================================================= */
 :root {
   /* --- 色 --- */
-  --color-bg: #f4f3ef;        /* いちばん背面のグレー(パネルの外側) */
-  --color-panel: #f4f3ef;     /* 中央の白い角丸パネル */
+  --color-bg: #e6e6e2;        /* いちばん背面のグレー(パネルの外側) */
+  --color-panel: #fbfbfa;     /* 中央の白い角丸パネル */
   --color-surface: #ffffff;   /* カード背景 */
-  --color-ink: #17171b;       /* 本文・見出し */
-  --color-ink-weak: #7a7871;  /* 補助テキスト */
+  --color-ink: #0d0d0d;       /* 本文・見出し */
+  --color-ink-weak: #888888;  /* 補助テキスト */
   --color-line: #e6e4de;      /* 罫線 */
   --color-accent: #2f52ff;    /* メインの青(フッター・アクティブ状態) */
   --color-accent-2: #ff5722;  /* サブアクセント */
 
   /* --- タイポグラフィ --- */
-  --font-body: "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
-  --font-display: "Instrument Serif", serif; /* 英字セクション見出し(イタリック) */
+  --font-body: "DM Sans", "Noto Sans JP", "Hiragino Kaku Gothic ProN", sans-serif;
+  --font-display: "Shippori Mincho", serif; /* 英字/見出し */
   --font-mono: "Space Mono", "SFMono-Regular", monospace; /* ラベル・番号用の等幅 */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -34,8 +34,11 @@
   --space-6: 6rem;
 
   /* --- レイアウト --- */
-  --sidebar-w: 240px;   /* 左サイドバーの幅 */
+  --sidebar-w: 240px;
   --radius-sm: 8px;
   --radius-md: 18px;
-  --radius-lg: 32px;    /* パネル・フッターの大きな角丸 */
+  --radius-lg: 32px;
+
+  /* --- 共通コンテナ幅 --- */
+  --container-max: 1384px; /* Figma: 1920px幅 - 左右268pxずつ */
 }
