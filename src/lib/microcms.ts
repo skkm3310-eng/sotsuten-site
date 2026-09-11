@@ -105,11 +105,14 @@ const mockWorks: Work[] = [
   },
 ];
 
-export async function getWorksList(queries?: MicroCMSQueries): Promise<Work[]> {
+export async function getWorksList(
+  queries?: MicroCMSQueries,
+  type: "exhibition" | "portfolio" = "exhibition"
+): Promise<Work[]> {
   if (!client) return mockWorks;
   const res = await client.getList<Work>({
     endpoint: "works",
-    queries: { limit: 100, filters: "type[contains]exhibition", ...queries },
+    queries: { limit: 100, filters: `type[contains]${type}`, ...queries },
   });
   return res.contents;
 }

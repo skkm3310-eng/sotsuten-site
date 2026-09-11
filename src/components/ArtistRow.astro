@@ -95,19 +95,26 @@ const snsList = [
           )}
         </div>
         {exhibition.length > 0 && (
-          <div class="carousel" id={`ex-${artist.id}`}>
-            {exhibition.map((w) => (
-              <button
-                class="slide"
-                type="button"
-                data-lightbox-src={w.image}
-                data-lightbox-title={w.title}
-                data-lightbox-caption={w.caption ?? ""}
-              >
-                <img src={w.image} alt={w.title} loading="lazy" />
-              </button>
-            ))}
-          </div>
+          <>
+            <div class="carousel" id={`ex-${artist.id}`}>
+              {exhibition.map((w) => (
+                <button
+                  class="slide"
+                  type="button"
+                  data-lightbox-src={w.image}
+                  data-lightbox-title={w.title}
+                  data-lightbox-caption={w.caption ?? ""}
+                >
+                  <img src={w.image} alt={w.title} loading="lazy" />
+                </button>
+              ))}
+            </div>
+            {exhibition.length > 3 && (
+              <div class="scrollbar-track">
+                <div class="scrollbar-thumb" data-track-for={`ex-${artist.id}`}></div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -134,6 +141,11 @@ const snsList = [
             </button>
           ))}
         </div>
+        {portfolio.length > 3 && (
+          <div class="scrollbar-track">
+            <div class="scrollbar-thumb" data-track-for={`pf-${artist.id}`}></div>
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -149,6 +161,33 @@ const snsList = [
       const step = slide ? slide.getBoundingClientRect().width + 24 : 300;
       carousel.scrollBy({ left: btn.classList.contains("next") ? step : -step, behavior: "smooth" });
     });
+  });
+
+  // ---- カルーセルのスクロール位置を示すバー ----
+  document.querySelectorAll<HTMLElement>(".scrollbar-thumb").forEach((thumb) => {
+    const targetId = thumb.dataset.trackFor;
+    const carousel = document.getElementById(targetId ?? "");
+    if (!carousel) return;
+
+    function updateThumb() {
+      if (!carousel) return;
+      const maxScroll = carousel.scrollWidth - carousel.clientWidth;
+      if (maxScroll <= 0) {
+        thumb.style.width = "100%";
+        thumb.style.left = "0%";
+        return;
+      }
+      const visibleRatio = carousel.clientWidth / carousel.scrollWidth;
+      const scrollRatio = carousel.scrollLeft / maxScroll;
+      const widthPercent = visibleRatio * 100;
+      const leftPercent = scrollRatio * (100 - widthPercent);
+      thumb.style.width = `${widthPercent}%`;
+      thumb.style.left = `${leftPercent}%`;
+    }
+
+    updateThumb();
+    carousel.addEventListener("scroll", updateThumb, { passive: true });
+    window.addEventListener("resize", updateThumb);
   });
 </script>
 
@@ -168,7 +207,6 @@ const snsList = [
     line-height: 1;
     text-align: right;
     color: #000;
-    padding-top: 8px;
   }
   .body { display: grid; grid-template-columns: 240px 1fr; gap: 88px; }
 
@@ -202,11 +240,12 @@ const snsList = [
   .sns-icon:hover .icon-default { opacity: 0; }
 
   /* --- 作品側(右) --- */
-  .works { display: flex; flex-direction: column; min-width: 0; }
+  .works { display: flex; flex-direction: column; min-width: 0; height: 100%; }
+
   .block { padding-bottom: 32px; display: flex; flex-direction: column; gap: 24px; }
   .block-head { position: relative; display: flex; align-items: flex-start; justify-content: space-between; }
   .title {
-    font-family: var(--font-body); font-size: 24px; line-height: 32px; color: var(--color-ink);
+    font-family: var(--font-body); font-size: 18px; line-height: 32px; color: var(--color-ink);
   }
   .title.solo { letter-spacing: -0.224px; }
   .eyebrow { font-family: var(--font-body); font-size: 12px; line-height: 22px; letter-spacing: 0.12px; color: var(--color-ink-weak); }
@@ -228,19 +267,37 @@ const snsList = [
     scrollbar-width: none;
   }
   .carousel::-webkit-scrollbar { display: none; }
+
+  .scrollbar-track {
+    position: relative;
+    width: 100%;
+    height: 2px;
+    background: var(--color-line);
+    margin-top: 16px;
+  }
+  .scrollbar-thumb {
+    position: absolute;
+    top: 0;
+    height: 2px;
+    background: var(--color-ink);
+    transition: left 0.1s linear;
+  }
   .slide {
     border: 0; padding: 0; cursor: pointer; display: block;
-    flex: 0 0 calc((100% - 48px) / 3);
+    flex: 0 0 280px;
     aspect-ratio: 4 / 3;
     background: #d9d9d9; scroll-snap-align: start; overflow: hidden;
   }
-  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .exhibition .slide, .past .slide { aspect-ratio: 4 / 3; }
+  .slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
   @media (max-width: 900px) {
     .row { grid-template-columns: 40px 1fr; gap: var(--space-2); padding-block: var(--space-4); }
     .num { font-size: 2rem; letter-spacing: 2px; }
     .body { grid-template-columns: 1fr; gap: var(--space-3); }
     .who-top { flex-direction: row-reverse; justify-content: space-between; }
-    .slide { flex-basis: calc((100% - 24px) / 2); height: 180px; }
+    .slide { flex-basis: calc((100% - 24px) / 2); }
+    .exhibition, .past { flex: none; }
+    .exhibition .slide, .past .slide { aspect-ratio: 4 / 3; }
   }
 </style>

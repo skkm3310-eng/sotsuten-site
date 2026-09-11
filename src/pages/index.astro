@@ -1,21 +1,71 @@
 ---
 import Base from "../layouts/Base.astro";
-import ArtistCard from "../components/ArtistCard.astro";
 import NewsAccordion from "../components/NewsAccordion.astro";
 import Hero from "../components/Hero.astro";
-import Opening from "../components/Opening.astro";
 import Reveal from "../components/Reveal.astro";
-import { getCollection } from "astro:content";
-import { getNewsList } from "../lib/microcms";
+import { getNewsList, getWorksList } from "../lib/microcms";
 
-const artists = (await getCollection("artists")).sort((a, b) => a.data.order - b.data.order);
 const news = await getNewsList({ limit: 5 });
-const filters = ["All", "Graphic", "Web", "Illustration"];
+const portfolioWorks = (await getWorksList({ limit: 6 }, "portfolio")).slice(0, 6);
+
+const categoryColors: Record<string, string> = {
+  "グラフィック": "#b07a52",
+  "イラスト": "#6b82a8",
+  "立体": "#7d9b76",
+};
+const categoryLabels: Record<string, string> = {
+  "グラフィック": "Graphic",
+  "イラスト": "Illustration",
+  "立体": "Design",
+};
+const filters = ["All", ...Array.from(new Set(portfolioWorks.flatMap((w) => w.tags ?? [])))];
 ---
 
 <Base>
-  <Opening />
   <Hero />
+
+  <section class="about-section">
+    <div class="about-inner">
+      <div class="about-text">
+        <p class="eyebrow">_About</p>
+        <div class="about-ja">
+          <p class="reveal-para">「変化（Henka）」は、専門学校を卒業してそれぞれの道を歩みはじめた、7人の若いクリエイターによるグループ展。</p>
+          <p class="reveal-para">デザイン、イラストなど、得意な領域はさまざま。作品を通して、かたちや素材、そして心の「変化」をそれぞれの視点で表現しています。手探りながらも真っ直ぐにつくった作品たちを、自由に楽しんでもらえたらうれしいです。</p>
+        </div>
+        <div class="about-en">
+          <p class="reveal-para">"変化" (Change) is a group exhibition featuring six young creators who have embarked on their respective paths after graduating from vocational school.</p>
+          <p class="reveal-para">Their areas of expertise vary, ranging from design and graphics to illustration. Through their work, they express "change"—whether in form, material, or the heart—from their own unique perspectives. We hope you enjoy these works, created with sincerity and a spirit of exploration.</p>
+        </div>
+      </div>
+
+      <div class="about-info">
+        <div class="info-grid">
+          <div class="info-item">
+            <p class="info-label">Date_</p>
+            <p class="info-value">2027.03.20 (Sat) - 2027.03.21 (Mon)</p>
+          </div>
+          <div class="info-item">
+            <p class="info-label">Hours_</p>
+            <p class="info-value">11:00 — 20:00(最終日のみ19:00まで)</p>
+          </div>
+          <div class="info-item">
+            <p class="info-label">Location_</p>
+            <p class="info-value">デザインフェスタギャラリー原宿 EAST館101b</p>
+          </div>
+          <div class="info-item">
+            <p class="info-label">Entry_</p>
+            <p class="info-value">Free</p>
+          </div>
+        </div>
+        <div class="map-block">
+          <p class="info-label">Map_</p>
+          <div class="map-placeholder">
+            <p>Google Maps</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <Reveal as="section" class="section" id="works">
     <div class="container">
@@ -28,10 +78,26 @@ const filters = ["All", "Graphic", "Web", "Illustration"];
         </div>
       </div>
       <p class="notice">※ 出展作品は現在準備中です。各メンバーのこれまでの作品を掲載しています。</p>
-      <div class="masonry" id="work-grid">
-        {artists.map((artist) => <ArtistCard artist={artist} />)}
+      <div class="work-grid" id="work-grid">
+        {portfolioWorks.map((w, i) => {
+          const tag = w.tags?.[0];
+          const color = tag ? categoryColors[tag] ?? "#888" : "#888";
+          const label = tag ? categoryLabels[tag] ?? tag : "";
+          return (
+            <div class="card" data-categories={(w.tags ?? []).join(" ")}>
+              <div class="thumb">
+                {w.image && <img src={w.image.url} alt={w.title} loading="lazy" />}
+                {label && <span class="badge" style={`background:${color}`}>{label}</span>}
+              </div>
+              <div class="meta">
+                <p class="wtitle">{w.title}</p>
+                <p class="artist">{w.exhibitor?.nameEN ?? w.exhibitor?.name}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
-      <p class="more"><a href="/works/">See All →</a></p>
+      <p class="more"><a href="/artists/">See All →</a></p>
     </div>
   </Reveal>
 
@@ -46,6 +112,20 @@ const filters = ["All", "Graphic", "Web", "Illustration"];
 </Base>
 
 <script>
+  // ---- About本文: 段落ごとのワイプ演出(スクロール位置を直接判定) ----
+  function checkReveal() {
+    document.querySelectorAll<HTMLElement>(".reveal-para").forEach((el) => {
+      if (el.classList.contains("in-view")) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.88) {
+        el.classList.add("in-view");
+      }
+    });
+  }
+  window.addEventListener("scroll", checkReveal, { passive: true });
+  window.addEventListener("resize", checkReveal);
+  setTimeout(checkReveal, 50);
+
   const buttons = document.querySelectorAll<HTMLButtonElement>(".filter");
   const cards = document.querySelectorAll<HTMLElement>("#work-grid .card");
   buttons.forEach((btn) => {
@@ -61,13 +141,122 @@ const filters = ["All", "Graphic", "Web", "Illustration"];
 </script>
 
 <style>
+  .about-section {
+    border-bottom: 1px solid var(--color-line);
+    padding: 95px var(--space-4);
+  }
+  .about-inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    display: flex;
+    gap: 64px;
+    align-items: center;
+  }
+  .about-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .eyebrow {
+    font-family: var(--font-body); font-size: 8.8px; line-height: 13.2px; letter-spacing: 3.96px;
+    text-transform: uppercase; color: var(--color-ink-weak);
+  }
+  .about-ja {
+    font-family: var(--font-body); font-weight: 300; font-size: 24px;
+    line-height: 48px; text-align: justify; color: var(--color-ink);
+  }
+  .about-ja :global(.char) {
+    display: inline-block;
+    opacity: 0;
+  }
+  .about-ja :global(.char.visible) {
+    opacity: 1;
+  }
+
+  .en-para {
+    clip-path: inset(0 100% 0 0);
+  }
+  .en-para.in-view {
+    animation: enWipe 0.9s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  .en-para:nth-child(2).in-view {
+    animation-delay: 0.15s;
+  }
+  @keyframes enWipe {
+    to { clip-path: inset(0 0 0 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .about-ja :global(.char) { opacity: 1; }
+    .en-para { clip-path: none; animation: none; }
+  }
+  .about-en {
+    font-family: var(--font-body); font-weight: 300; font-size: 12px;
+    line-height: 24px; text-align: justify; color: var(--color-ink);
+  }
+
+  .about-info { flex: 1; display: flex; flex-direction: column; gap: 32px; padding-top: 45.2px; }
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+  }
+  .info-item {
+    display: flex; flex-direction: column; gap: 8px;
+    padding-top: 16px; border-top: 1px solid var(--color-line);
+  }
+  .info-label {
+    font-family: var(--font-body); font-size: 8px; letter-spacing: 2.8px;
+    text-transform: uppercase; color: var(--color-ink-weak);
+  }
+  .info-value {
+    font-family: var(--font-body); font-size: 12.8px; letter-spacing: 0.128px;
+    color: var(--color-ink);
+  }
+
+  .map-block {
+    display: flex; flex-direction: column; gap: 12px;
+    padding-top: 16px; border-top: 1px solid var(--color-line); flex: 1;
+  }
+  .map-placeholder {
+    background: #f5f5f5; border: 1px solid var(--color-line);
+    display: flex; align-items: center; justify-content: center;
+    min-height: 180px; flex: 1;
+  }
+  .map-placeholder p {
+    font-family: var(--font-body); font-size: 8.8px; letter-spacing: 2.64px;
+    text-transform: uppercase; color: #ccc;
+  }
+
+  @media (max-width: 1200px) {
+    .about-inner { flex-direction: column; gap: 40px; }
+    .about-info { padding-top: 0; width: 100%; }
+    .about-text { width: 100%; }
+  }
+  @media (max-width: 600px) {
+    .info-grid { grid-template-columns: 1fr; }
+  }
+
   .notice { font-size: var(--text-sm); color: var(--color-ink-weak); margin-bottom: var(--space-3); }
   .head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-4); flex-wrap: wrap; }
   .filters { display: flex; gap: var(--space-1); flex-wrap: wrap; }
   .filter { border: 0; background: transparent; border-radius: 999px; padding: 0.4em 1em; font-size: var(--text-sm); color: var(--color-ink-weak); }
   .filter[aria-pressed="true"] { background: var(--color-accent); color: #fff; }
-  .masonry { column-count: 2; column-gap: var(--space-3); }
-  @media (max-width: 600px) { .masonry { column-count: 1; } }
+  .work-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .card { display: flex; flex-direction: column; }
+  .thumb { position: relative; aspect-ratio: 600 / 750; background: #f0ede9; overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .badge {
+    position: absolute; left: 14px; top: 20px;
+    padding: 3px 9.6px; font-family: var(--font-body); font-size: 7.2px;
+    letter-spacing: 2.16px; text-transform: uppercase; color: #fff;
+  }
+  .meta { display: flex; align-items: flex-start; justify-content: space-between; padding-top: 14px; gap: var(--space-2); }
+  .wtitle { font-family: var(--font-body); font-size: 18px; letter-spacing: 0.12px; color: var(--color-ink); }
+  .artist { font-family: var(--font-body); font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--color-ink-weak); margin-top: 3.19px; }
+
+  @media (max-width: 900px) { .work-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .work-grid { grid-template-columns: 1fr; } }
   .more { margin-top: var(--space-3); }
   .more a { text-decoration: none; font-weight: 500; }
   .more a:hover { color: var(--color-accent); }

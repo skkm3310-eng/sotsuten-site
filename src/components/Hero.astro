@@ -1,34 +1,35 @@
 ---
 /**
  * HERO キービジュアル(カメレオン)
- * - イラスト(/public/chameleon.svg)を配置
- * - イラスト内の目の位置に、瞳孔だけを重ねて表示
- * - 初回表示: 決まった動き(3.6秒) → PC: カーソル追従 / スマホ: idleの上下左右揺れ
- * - テキスト部分はFigma(node 1:55)の数値をそのまま反映
+ * PC: イラストが中央、左に見出し+タグライン、右に日程+料金(絶対配置で重ねる)
+ * スマホ: 見出し → イラスト → タグライン → 日程/料金、の縦積み(flex + order)
  */
 ---
 
 <section class="hero" aria-label="キービジュアル">
-  <div class="chameleon-wrapper">
-    <img src="/chameleon.svg" alt="カメレオンのイラスト" class="chameleon-img" />
-    <div class="eye-area" id="eyeArea">
-      <div class="pupil" id="pupil"></div>
-    </div>
-  </div>
-
-  <div class="hero-text">
-    <div class="top-row">
+  <div class="stage">
+    <div class="heading-block">
       <p class="eyebrow">Group Exhibition</p>
-      <p class="location">in HARAJUKU Tokyo</p>
+      <h1 class="title">変化</h1>
+      <p class="location-mobile">in HARAJUKU Tokyo</p>
     </div>
 
-    <h1 class="title">変化</h1>
+    <div class="chameleon-crop">
+      <div class="chameleon-wrapper">
+        <img src="/chameleon.svg" alt="カメレオンのイラスト" class="chameleon-img" />
+        <div class="eye-area" id="eyeArea">
+          <div class="pupil" id="pupil"></div>
+        </div>
+      </div>
+    </div>
 
-    <div class="bottom-row">
-      <p class="tagline">
-        Design, Graphic, Illustration —<br />
-        7 artists exploring the theme of change.
-      </p>
+    <p class="tagline">
+      Design, Graphic, Illustration —<br />
+      7 artists exploring the theme of change.
+    </p>
+
+    <div class="meta-block">
+      <p class="location">in HARAJUKU Tokyo</p>
       <div class="meta">
         <div class="meta-item">
           <p class="meta-value">2027.03.20 (Sat)</p>
@@ -88,46 +89,42 @@
 <style>
   .hero { padding: var(--space-3); }
 
-  .chameleon-wrapper {
+  .stage {
     position: relative;
-    width: 100%;
-    max-width: 1120px;
-    aspect-ratio: 1120 / 794;
+    max-width: 1624px;
     margin-inline: auto;
+    aspect-ratio: 2560 / 1249;
   }
 
-  .chameleon-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    display: block;
+  /* --- イラスト --- */
+  .chameleon-wrapper {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    aspect-ratio: 1120 / 794;
+    z-index: 2;
   }
+  .chameleon-img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+  .chameleon-crop { display: contents; }
+
 
   .eye-area {
     position: absolute;
-    top: 22.10%;
-    left: 73.53%;
-    width: 5.4464%;
+    top: 22.10%; left: 73.53%; width: 5.4464%;
     aspect-ratio: 1 / 1;
     transform: translate(-50%, -50%);
   }
-
   .pupil {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 22%;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
+    top: 50%; left: 50%; width: 22%;
+    aspect-ratio: 1 / 1; border-radius: 50%;
     background: #666666;
     transform: translate(-50%, -50%);
   }
-
-  .pupil.opening {
-    animation-name: pupilOpening;
-    animation-duration: 3.6s;
-    animation-fill-mode: forwards;
-  }
+  .pupil.opening { animation-name: pupilOpening; animation-duration: 3.6s; animation-fill-mode: forwards; }
   @keyframes pupilOpening {
     0%   { transform: translate(-50%, -50%); animation-timing-function: linear; }
     22%  { transform: translate(-50%, -50%); animation-timing-function: linear; }
@@ -138,7 +135,6 @@
     89%  { transform: translate(calc(-50% - 69.23%), calc(-50% + 100%)); animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1); }
     100% { transform: translate(-50%, -50%); }
   }
-
   .pupil.idle-sway { animation: pupilSway 6s ease-in-out infinite; }
   @keyframes pupilSway {
     0%   { transform: translate(calc(-50% - 61.54%), calc(-50% + 0%)); }
@@ -148,80 +144,104 @@
     100% { transform: translate(calc(-50% - 61.54%), calc(-50% + 0%)); }
   }
 
-  .hero-text {
-    max-width: 1624px;
-    margin-inline: auto;
-    padding-inline: var(--space-4);
-    margin-top: var(--space-4);
+  /* --- PC: 見出し(左下) --- */
+  .heading-block {
+    position: absolute;
+    left: 0; bottom: 22%;
+    width: 34%;
+    z-index: 1;
   }
-
-  .top-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-3);
-  }
-
-  .eyebrow, .location {
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: 24px;
-    line-height: 13.2px;
-    text-transform: uppercase;
+  .eyebrow {
+    font-family: var(--font-body); font-weight: 400; font-size: 16px;
+    line-height: 1.2; letter-spacing: 2.64px; text-transform: uppercase;
     color: var(--color-ink-weak);
-    white-space: nowrap;
   }
-  .eyebrow { letter-spacing: 3.96px; }
-  .location { letter-spacing: 3.08px; text-align: right; }
-
   .title {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 252px;
-    line-height: 1;
-    letter-spacing: 12.6px;
-    color: var(--color-ink);
-    margin: 0;
+    font-family: var(--font-display); font-weight: 500;
+    font-size: clamp(3.5rem, 9vw, 150px); line-height: 1;
+    letter-spacing: 0.02em; color: var(--color-ink); margin: 0.15em 0 0;
   }
+  .location-mobile { display: none; }
 
-  .bottom-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: var(--space-3);
-    padding-top: 20px;
-  }
-
+  /* --- PC: タグライン(見出しの下) --- */
   .tagline {
-    font-family: var(--font-body);
-    font-weight: 300;
-    font-size: 20px;
-    line-height: 35.84px;
-    letter-spacing: 0.224px;
-    color: var(--color-ink-weak);
-    max-width: 512px;
+    position: absolute;
+    left: 0; bottom: 8%;
+    width: 34%;
+    font-family: var(--font-body); font-weight: 300; font-size: 16px;
+    line-height: 1.7; color: var(--color-ink-weak);
   }
 
-  .meta { display: flex; gap: 48px; }
+  /* --- PC: 右側(場所+日程/料金) --- */
+  .meta-block {
+    position: absolute;
+    right: 0; top: 0; height: 100%;
+    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
+    z-index: 1;
+  }
+  .location {
+    font-family: var(--font-body); font-weight: 400; font-size: 16px;
+    line-height: 1.2; letter-spacing: 2px; text-transform: uppercase;
+    text-align: right; color: var(--color-ink-weak);
+  }
+  .meta { display: flex; gap: 32px; }
   .meta-item { display: flex; flex-direction: column; align-items: center; }
   .meta-value {
-    font-family: var(--font-body);
-    font-weight: 300;
-    font-size: 44.8px;
-    line-height: 67.2px;
-    letter-spacing: -0.896px;
-    color: var(--color-ink);
-    text-align: center;
-    white-space: nowrap;
+    font-family: var(--font-body); font-weight: 300; font-size: 28px;
+    line-height: 1.4; color: var(--color-ink); text-align: center; white-space: nowrap;
   }
   .meta-label {
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: 8.8px;
-    line-height: 13.2px;
-    letter-spacing: 2.64px;
-    text-transform: uppercase;
+    font-family: var(--font-body); font-weight: 400; font-size: 8px;
+    line-height: 1.4; letter-spacing: 2px; text-transform: uppercase;
     color: var(--color-ink-weak);
+  }
+
+  /* --- スマホ: 見出し→イラスト→タグライン→日程/料金、の縦積み --- */
+  @media (max-width: 1200px) {
+    .stage {
+      aspect-ratio: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 20px 0;
+      box-sizing: border-box;
+      overflow-x: hidden;
+      max-width: 100%;
+    }
+    .heading-block {
+      position: relative; left: auto; bottom: auto; width: 100%;
+      order: 1;
+    }
+    .chameleon-crop {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      order: 2;
+    }
+    .chameleon-wrapper {
+      position: relative; top: auto; left: auto; transform: none;
+      width: clamp(100%, 100% + (1200px - 100vw) * 1.107, 166.4%);
+      margin-left: clamp(-66.4%, (100vw - 1200px) * 0.4275, 0%);
+    }
+    .tagline {
+      position: relative; left: auto; bottom: auto; width: 100%;
+      order: 3; font-size: 14px; margin-top: 20px;
+    }
+    .meta-block {
+      position: relative; right: auto; top: auto; height: auto;
+      flex-direction: row; justify-content: flex-start; align-items: flex-start;
+      order: 4; margin-top: 16px;
+    }
+
+    .eyebrow { font-size: 11px; letter-spacing: 1.8px; }
+    .title { font-size: clamp(2.5rem, 13vw, 3.5rem); margin-top: 0.1em; }
+    .location-mobile {
+      display: block;
+      font-family: var(--font-body); font-weight: 400; font-size: 14px;
+      letter-spacing: 1.6px; text-transform: uppercase;
+      color: var(--color-ink-weak); margin-top: 12px;
+    }
+    .location { display: none; }
+    .meta { gap: 32px; }
+    .meta-value { font-size: 18px; }
   }
 </style>
