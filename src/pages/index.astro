@@ -124,7 +124,8 @@ const filters = ["All", ...Array.from(new Set(portfolioWorks.flatMap((w) => w.ta
   }
   window.addEventListener("scroll", checkReveal, { passive: true });
   window.addEventListener("resize", checkReveal);
-  setTimeout(checkReveal, 50);
+  // ページ読み込み後、少し間を置いてから最初のチェックを行う(最初から画面内にある段落も、確実にアニメーションさせるため)
+  setTimeout(checkReveal, 200);
 
   const buttons = document.querySelectorAll<HTMLButtonElement>(".filter");
   const cards = document.querySelectorAll<HTMLElement>("#work-grid .card");
@@ -143,14 +144,16 @@ const filters = ["All", ...Array.from(new Set(portfolioWorks.flatMap((w) => w.ta
 <style>
   .about-section {
     border-bottom: 1px solid var(--color-line);
-    padding: 95px var(--space-4);
+    padding-block: 95px;
   }
   .about-inner {
     max-width: var(--container-max);
     margin-inline: auto;
+    padding-inline: var(--space-4);
+    box-sizing: border-box;
     display: flex;
     gap: 64px;
-    align-items: center;
+    align-items: stretch;
   }
   .about-text {
     flex: 1;
@@ -165,6 +168,7 @@ const filters = ["All", ...Array.from(new Set(portfolioWorks.flatMap((w) => w.ta
   .about-ja {
     font-family: var(--font-body); font-weight: 300; font-size: 24px;
     line-height: 48px; text-align: justify; color: var(--color-ink);
+    margin-top: -12px;
   }
   .about-ja :global(.char) {
     display: inline-block;
@@ -174,21 +178,15 @@ const filters = ["All", ...Array.from(new Set(portfolioWorks.flatMap((w) => w.ta
     opacity: 1;
   }
 
-  .en-para {
+  .reveal-para {
     clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.9s cubic-bezier(0.65, 0, 0.35, 1);
   }
-  .en-para.in-view {
-    animation: enWipe 0.9s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  }
-  .en-para:nth-child(2).in-view {
-    animation-delay: 0.15s;
-  }
-  @keyframes enWipe {
-    to { clip-path: inset(0 0 0 0); }
+  .reveal-para.in-view {
+    clip-path: inset(0 0 0 0);
   }
   @media (prefers-reduced-motion: reduce) {
-    .about-ja :global(.char) { opacity: 1; }
-    .en-para { clip-path: none; animation: none; }
+    .reveal-para { clip-path: none; transition: none; }
   }
   .about-en {
     font-family: var(--font-body); font-weight: 300; font-size: 12px;

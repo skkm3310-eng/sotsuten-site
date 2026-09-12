@@ -34,7 +34,7 @@ button { font: inherit; cursor: pointer; }
 
 /* 英字のセクション見出し(Works / News) */
 .section-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-style: italic;
   font-weight: 400;
   font-size: var(--text-xl);

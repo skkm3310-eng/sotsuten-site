@@ -54,7 +54,17 @@ const filters = ["All", ...Array.from(new Set(works.flatMap((w) => w.tags ?? [])
             <Reveal>
               <div class="card" data-categories={(w.tags ?? []).join(" ")}>
                 <div class="thumb">
-                  {w.image && <img src={w.image.url} alt={w.title} loading="lazy" />}
+                  {w.image && (
+                    <button
+                      class="thumb-btn"
+                      type="button"
+                      data-lightbox-src={w.image.url}
+                      data-lightbox-title={w.title}
+                      data-lightbox-caption={w.description ?? ""}
+                    >
+                      <img src={w.image.url} alt={w.title} loading="lazy" />
+                    </button>
+                  )}
                   {label && <span class="badge" style={`background:${color}`}>{label}</span>}
                 </div>
                 <div class="meta">
@@ -99,7 +109,7 @@ const filters = ["All", ...Array.from(new Set(works.flatMap((w) => w.tags ?? [])
     gap: var(--space-3); padding-block: 16px 32px;
   }
   h1 {
-    font-family: var(--font-body); font-weight: 300;
+    font-family: var(--font-body); font-style: italic; font-weight: 300;
     font-size: 56px; letter-spacing: -1.12px; line-height: 56px;
     color: var(--color-ink); margin: 0;
   }
@@ -121,6 +131,10 @@ const filters = ["All", ...Array.from(new Set(works.flatMap((w) => w.tags ?? [])
   }
   .card { display: flex; flex-direction: column; }
   .thumb { position: relative; aspect-ratio: 600 / 750; background: #f0ede9; overflow: hidden; }
+  .thumb-btn {
+    display: block; width: 100%; height: 100%;
+    border: 0; padding: 0; margin: 0; background: transparent; cursor: pointer;
+  }
   .thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .badge {
     position: absolute; left: 14px; top: 20px;

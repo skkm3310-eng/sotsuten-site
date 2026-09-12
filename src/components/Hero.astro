@@ -8,8 +8,12 @@
 
 <section class="hero" aria-label="キービジュアル">
   <div class="stage">
-    <div class="heading-block">
+    <div class="top-row">
       <p class="eyebrow">Group Exhibition</p>
+      <p class="location">in HARAJUKU Tokyo</p>
+    </div>
+
+    <div class="heading-block">
       <h1 class="title">変化</h1>
       <p class="location-mobile">in HARAJUKU Tokyo</p>
     </div>
@@ -29,7 +33,6 @@
     </p>
 
     <div class="meta-block">
-      <p class="location">in HARAJUKU Tokyo</p>
       <div class="meta">
         <div class="meta-item">
           <p class="meta-value">2027.03.20 (Sat)</p>
@@ -87,12 +90,14 @@
 </script>
 
 <style>
-  .hero { padding: var(--space-3); }
+  .hero { padding-block: var(--space-3); }
 
   .stage {
     position: relative;
-    max-width: 1624px;
+    max-width: var(--container-max);
     margin-inline: auto;
+    padding-top: var(--space-4);
+    box-sizing: border-box;
     aspect-ratio: 2560 / 1249;
   }
 
@@ -145,9 +150,15 @@
   }
 
   /* --- PC: 見出し(左下) --- */
+  .top-row {
+    position: absolute;
+    left: var(--space-4); top: 0; right: var(--space-4);
+    display: flex; align-items: flex-start; justify-content: space-between;
+    z-index: 3;
+  }
   .heading-block {
     position: absolute;
-    left: 0; bottom: 22%;
+    left: var(--space-4); bottom: 22%;
     width: 34%;
     z-index: 1;
   }
@@ -158,7 +169,7 @@
   }
   .title {
     font-family: var(--font-display); font-weight: 500;
-    font-size: clamp(3.5rem, 9vw, 150px); line-height: 1;
+    font-size: 150px; line-height: 1;
     letter-spacing: 0.02em; color: var(--color-ink); margin: 0.15em 0 0;
   }
   .location-mobile { display: none; }
@@ -166,29 +177,29 @@
   /* --- PC: タグライン(見出しの下) --- */
   .tagline {
     position: absolute;
-    left: 0; bottom: 8%;
+    left: var(--space-4); bottom: 0;
     width: 34%;
     font-family: var(--font-body); font-weight: 300; font-size: 16px;
     line-height: 1.7; color: var(--color-ink-weak);
   }
 
   /* --- PC: 右側(場所+日程/料金) --- */
-  .meta-block {
-    position: absolute;
-    right: 0; top: 0; height: 100%;
-    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end;
-    z-index: 1;
-  }
   .location {
     font-family: var(--font-body); font-weight: 400; font-size: 16px;
     line-height: 1.2; letter-spacing: 2px; text-transform: uppercase;
     text-align: right; color: var(--color-ink-weak);
   }
+  .meta-block {
+    position: absolute;
+    right: var(--space-4); bottom: 0;
+    display: flex;
+    z-index: 1;
+  }
   .meta { display: flex; gap: 32px; }
-  .meta-item { display: flex; flex-direction: column; align-items: center; }
+  .meta-item { display: flex; flex-direction: column; align-items: flex-start; }
   .meta-value {
     font-family: var(--font-body); font-weight: 300; font-size: 28px;
-    line-height: 1.4; color: var(--color-ink); text-align: center; white-space: nowrap;
+    line-height: 1.4; color: var(--color-ink); text-align: left; white-space: nowrap;
   }
   .meta-label {
     font-family: var(--font-body); font-weight: 400; font-size: 8px;
@@ -202,10 +213,13 @@
       aspect-ratio: auto;
       display: flex;
       flex-direction: column;
-      padding: 8px 20px 0;
+      padding: 8px var(--space-4) 0;
       box-sizing: border-box;
       overflow-x: hidden;
       max-width: 100%;
+    }
+    .top-row {
+      display: none;
     }
     .heading-block {
       position: relative; left: auto; bottom: auto; width: 100%;
@@ -233,7 +247,7 @@
     }
 
     .eyebrow { font-size: 11px; letter-spacing: 1.8px; }
-    .title { font-size: clamp(2.5rem, 13vw, 3.5rem); margin-top: 0.1em; }
+    .title { font-size: 150px; margin-top: 0.1em; }
     .location-mobile {
       display: block;
       font-family: var(--font-body); font-weight: 400; font-size: 14px;
